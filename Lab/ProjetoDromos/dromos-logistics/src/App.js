@@ -394,7 +394,7 @@ export default function DromosLogistics() {
               LOGISTICS
             </text>
           </svg>
-          <p style={subtitleStyle}>International Logistics Planning</p>
+          {/* <p style={subtitleStyle}>International Logistics Planning</p> */}
         </div>
 
         <div style={formContainerStyle}>
