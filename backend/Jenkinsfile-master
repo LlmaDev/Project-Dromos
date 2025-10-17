@@ -1,0 +1,147 @@
+pipeline {
+    agent any
+    
+    environment {
+        PROJECT_NAME = 'Project-Dromos Backend'
+        BUILD_JOB = 'dromos-backend-build'
+        TEST_JOB = 'dromos-backend-test'
+        EMAIL_JOB = 'dromos-backend-email'
+    }
+    
+    stages {
+        stage('Inicialização') {
+            steps {
+                echo "Iniciando pipeline completo do ${env.PROJECT_NAME}"
+                echo "Build Number: ${env.BUILD_NUMBER}"
+                echo "Branch: ${env.BRANCH_NAME ?: 'main'}"
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo 'Executando job de build...'
+                script {
+                    def buildResult = build job: env.BUILD_JOB, 
+                                           parameters: [],
+                                           wait: true,
+                                           propagate: false
+                    
+                    env.BUILD_JOB_STATUS = buildResult.result
+                    env.BUILD_JOB_NUMBER = buildResult.number
+                    
+                    if (buildResult.result != 'SUCCESS') {
+                        error "Job de build falhou com status: ${buildResult.result}"
+                    }
+                    
+                    echo "Build concluído com sucesso! Build #${buildResult.number}"
+                }
+            }
+        }
+        
+        stage('Testes') {
+            steps {
+                echo 'Executando job de testes...'
+                script {
+                    def testResult = build job: env.TEST_JOB,
+                                          parameters: [],
+                                          wait: true,
+                                          propagate: false
+                    
+                    env.TEST_JOB_STATUS = testResult.result
+                    env.TEST_JOB_NUMBER = testResult.number
+                    
+                    if (testResult.result != 'SUCCESS') {
+                        error "Job de testes falhou com status: ${testResult.result}"
+                    }
+                    
+                    echo "Testes concluídos com sucesso! Build #${testResult.number}"
+                }
+            }
+        }
+        
+        stage('Relatório Final') {
+            steps {
+                script {
+                    echo 'Gerando relatório final...'
+                    
+                    env.PIPELINE_STATUS = 'SUCCESS'
+                    env.PIPELINE_SUMMARY = """
+                    ✅ Pipeline executado com SUCESSO!
+                    
+                    Resumo:
+                    - Build Job: ${env.BUILD_JOB_STATUS} (Build #${env.BUILD_JOB_NUMBER})
+                    - Test Job: ${env.TEST_JOB_STATUS} (Build #${env.TEST_JOB_NUMBER})
+                    - Pipeline Build: #${env.BUILD_NUMBER}
+                    - Duração Total: ${currentBuild.durationString}
+                    """
+                    
+                    echo env.PIPELINE_SUMMARY
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Executando notificação por email...'
+            script {
+                // Sempre executa o job de email, independente do resultado
+                build job: env.EMAIL_JOB,
+                      parameters: [
+                          string(name: 'PIPELINE_STATUS', value: env.PIPELINE_STATUS ?: 'UNKNOWN'),
+                          string(name: 'BUILD_STATUS', value: env.BUILD_JOB_STATUS ?: 'NOT_EXECUTED'),
+                          string(name: 'TEST_STATUS', value: env.TEST_JOB_STATUS ?: 'NOT_EXECUTED'),
+                          string(name: 'PIPELINE_BUILD_NUMBER', value: env.BUILD_NUMBER),
+                          string(name: 'PIPELINE_URL', value: env.BUILD_URL)
+                      ],
+                      wait: false,
+                      propagate: false
+            }
+        }
+        
+        success {
+            echo '🎉 Pipeline completo executado com SUCESSO!'
+            
+            // Aqui você pode adicionar ações para execução bem-sucedida
+            // Por exemplo: deploy automático, notificação no Slack, etc.
+        }
+        
+        failure {
+            script {
+                env.PIPELINE_STATUS = 'FAILURE'
+                env.PIPELINE_SUMMARY = """
+                ❌ Pipeline FALHOU!
+                
+                Detalhes:
+                - Build Job: ${env.BUILD_JOB_STATUS ?: 'NOT_EXECUTED'}
+                - Test Job: ${env.TEST_JOB_STATUS ?: 'NOT_EXECUTED'}
+                - Pipeline Build: #${env.BUILD_NUMBER}
+                - Erro detectado em: ${env.STAGE_NAME ?: 'Estágio desconhecido'}
+                
+                Verifique os logs para mais detalhes.
+                """
+                
+                echo env.PIPELINE_SUMMARY
+            }
+        }
+        
+        unstable {
+            script {
+                env.PIPELINE_STATUS = 'UNSTABLE'
+                echo '⚠️ Pipeline instável - alguns testes podem ter falhado'
+            }
+        }
+        
+        aborted {
+            script {
+                env.PIPELINE_STATUS = 'ABORTED'
+                echo '🛑 Pipeline abortado pelo usuário'
+            }
+        }
+        
+        cleanup {
+            echo 'Limpeza final do pipeline...'
+            // Adicione aqui qualquer limpeza necessária
+        }
+    }
+}

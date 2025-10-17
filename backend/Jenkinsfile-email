@@ -1,0 +1,112 @@
+pipeline {
+    agent any
+    
+    environment {
+        // Configure estas variáveis de acordo com seu servidor de email
+        EMAIL_SMTP_SERVER = 'smtp.gmail.com'
+        EMAIL_SMTP_PORT = '587'
+        EMAIL_FROM = 'seu-email@gmail.com'
+        EMAIL_TO = 'destinatario@email.com'
+        EMAIL_SUBJECT = 'Jenkins - Status do Build Project-Dromos Backend'
+    }
+    
+    stages {
+        stage('Verificar Status dos Jobs') {
+            steps {
+                script {
+                    echo 'Verificando status dos jobs anteriores...'
+                    
+                    // Aqui você pode adicionar lógica para verificar o status dos outros jobs
+                    def buildJobStatus = 'SUCCESS' // Substitua pela verificação real
+                    def testJobStatus = 'SUCCESS'   // Substitua pela verificação real
+                    
+                    env.BUILD_STATUS = buildJobStatus
+                    env.TEST_STATUS = testJobStatus
+                    
+                    if (buildJobStatus == 'SUCCESS' && testJobStatus == 'SUCCESS') {
+                        env.OVERALL_STATUS = 'SUCCESS'
+                        env.EMAIL_BODY = """
+                        Olá!
+                        
+                        O pipeline do Project-Dromos Backend foi executado com SUCESSO!
+                        
+                        Detalhes:
+                        - Job de Build: ${buildJobStatus}
+                        - Job de Testes: ${testJobStatus}
+                        - Data/Hora: ${new Date()}
+                        - Branch: ${env.BRANCH_NAME ?: 'main'}
+                        - Build Number: ${env.BUILD_NUMBER}
+                        
+                        Jenkins URL: ${env.BUILD_URL}
+                        
+                        Att,
+                        Jenkins CI/CD
+                        """
+                    } else {
+                        env.OVERALL_STATUS = 'FAILURE'
+                        env.EMAIL_BODY = """
+                        Atenção!
+                        
+                        O pipeline do Project-Dromos Backend FALHOU!
+                        
+                        Detalhes:
+                        - Job de Build: ${buildJobStatus}
+                        - Job de Testes: ${testJobStatus}
+                        - Data/Hora: ${new Date()}
+                        - Branch: ${env.BRANCH_NAME ?: 'main'}
+                        - Build Number: ${env.BUILD_NUMBER}
+                        
+                        Por favor, verifique os logs em: ${env.BUILD_URL}
+                        
+                        Att,
+                        Jenkins CI/CD
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Enviar Email') {
+            steps {
+                script {
+                    echo 'Enviando notificação por email...'
+                    
+                    def emailSubject = "${env.EMAIL_SUBJECT} - ${env.OVERALL_STATUS}"
+                    
+                    emailext (
+                        subject: emailSubject,
+                        body: env.EMAIL_BODY,
+                        to: env.EMAIL_TO,
+                        from: env.EMAIL_FROM,
+                        mimeType: 'text/plain'
+                    )
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Job de notificação finalizado!'
+        }
+        success {
+            echo 'Email enviado com sucesso!'
+        }
+        failure {
+            echo 'Falha ao enviar email!'
+            // Enviar email de falha do próprio job de email
+            emailext (
+                subject: 'ERRO: Falha no Job de Notificação - Project-Dromos',
+                body: """
+                Houve uma falha no job de notificação do Project-Dromos.
+                
+                Por favor, verifique a configuração do Jenkins e do servidor de email.
+                
+                Build URL: ${env.BUILD_URL}
+                """,
+                to: env.EMAIL_TO,
+                from: env.EMAIL_FROM
+            )
+        }
+    }
+}

@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven-3.9.0' // Configure o nome da sua instalação do Maven no Jenkins
+        jdk 'JDK-17' // Configure o nome da sua instalação do JDK 17 no Jenkins
+    }
+    
+    environment {
+        MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Fazendo checkout do código...'
+                checkout scm
+            }
+        }
+        
+        stage('Clean') {
+            steps {
+                echo 'Limpando build anterior...'
+                dir('backend') {
+                    sh 'mvn clean'
+                }
+            }
+        }
+        
+        stage('Compile') {
+            steps {
+                echo 'Compilando o projeto...'
+                dir('backend') {
+                    sh 'mvn compile'
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Executando testes...'
+                dir('backend') {
+                    sh 'mvn test'
+                }
+            }
+        }
+        
+        stage('Test Report') {
+            steps {
+                echo 'Gerando relatórios de teste...'
+                dir('backend') {
+                    publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/site/jacoco',
+                        reportFiles: 'index.html',
+                        reportName: 'JaCoCo Coverage Report'
+                    ])
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Testes finalizados!'
+            dir('backend') {
+                // Publica os resultados dos testes mesmo se falharam
+                publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+            }
+            cleanWs()
+        }
+        success {
+            echo 'Todos os testes passaram!'
+        }
+        failure {
+            echo 'Alguns testes falharam!'
+        }
+        unstable {
+            echo 'Build instável - alguns testes falharam!'
+        }
+    }
+}
