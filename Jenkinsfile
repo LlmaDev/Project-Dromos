@@ -15,5 +15,21 @@ pipeline {
                 sh 'mvn -version'
             }
         }
+
+        stage('Checkout') {
+            steps {
+                // Pega o código do repositório
+                checkout scm
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                dir('backend') {
+                    // Executa o build com Maven
+                    sh 'mvn clean package'
+                }
+            }
+        }
     }
 }
