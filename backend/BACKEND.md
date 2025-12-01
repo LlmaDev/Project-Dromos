@@ -6,9 +6,23 @@ Backend do sistema Project Dromos que fornece funcionalidades de consulta e cál
 - Retorna lista com código e nome dos países
 - Usado pelo frontend para popular dropdowns e autocomplete
 
+``` sh
+curl -X GET "http://localhost:8080/api/tariffs/countries"
+```
+
 ### 2. **Cálculo de Tarifas** (`POST /api/tariffs/calculate`)
 - Calcula tarifas baseado em códigos HS e países
 - Retorna tarifa detalhada e preço final
+
+``` sh
+curl -X POST "http://localhost:8080/api/tariffs/calculate" -H "Content-Type: application/json" \
+ -d '{
+    "hsCode":"010121",
+    "totalPrice":"1000",
+    "startLocationCode":"067",
+    "endLocationCode":"840"
+}'
+```
 
 ## Configuração
 
