@@ -108,6 +108,24 @@ class WtoApiClientImplTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void fetchTariffData_WhenInputIsInvalid_ShouldReturnEmptyList() {
+        // When
+        List<TariffData> result1 = wtoApiClient.fetchTariffData("", Arrays.asList("076"));
+        List<TariffData> result2 = wtoApiClient.fetchTariffData("97", Arrays.asList());
+        List<TariffData> result3 = wtoApiClient.fetchTariffData("97", Arrays.asList("076", "076"));
+
+        // Then
+        assertNotNull(result1);
+        assertTrue(result1.isEmpty());
+
+        assertNotNull(result2);
+        assertTrue(result2.isEmpty());
+
+        assertNotNull(result3);
+        assertTrue(result3.isEmpty());
+    }
+
     private void setField(String fieldName, String value) {
         try {
             var field = WtoApiClientImpl.class.getDeclaredField(fieldName);
