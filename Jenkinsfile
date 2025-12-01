@@ -1,6 +1,10 @@
 pipeline {
     agent any
     
+    environment {
+        DEFAULT_RECIPIENTS = 'yambertamini.sol@gmail.com'
+    }
+    
     stages {
         
         stage('Check Environment') {
@@ -83,7 +87,7 @@ Console Output: ${env.BUILD_URL}console/
                     emailext (
                         subject: subject,
                         body: body,
-                        to: '${DEFAULT_RECIPIENTS}', // Usa configuração global do Jenkins
+                        to: env.DEFAULT_RECIPIENTS,
                         mimeType: 'text/plain',
                         attachLog: true,
                         compressLog: true
@@ -105,7 +109,7 @@ Console Output: ${env.BUILD_URL}console/
             script {
                 try {
                     mail (
-                        to: '${DEFAULT_RECIPIENTS}',
+                        to: env.DEFAULT_RECIPIENTS,
                         subject: "SUCCESS: ${env.JOB_NAME} - #${env.BUILD_NUMBER}",
                         body: "Build completed successfully!\n\nCheck artifacts: ${env.BUILD_URL}artifact/"
                     )
@@ -121,7 +125,7 @@ Console Output: ${env.BUILD_URL}console/
             script {
                 try {
                     mail (
-                        to: '${DEFAULT_RECIPIENTS}',
+                        to: env.DEFAULT_RECIPIENTS,
                         subject: "FAILURE: ${env.JOB_NAME} - #${env.BUILD_NUMBER}",
                         body: "Build failed!\n\nCheck console: ${env.BUILD_URL}console/"
                     )
