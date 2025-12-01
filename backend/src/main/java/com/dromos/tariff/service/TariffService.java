@@ -23,5 +23,14 @@ public class TariffService {
     public List<Country> getCountries() {
         return countryService.getAllCountries();
     }
+    
+    /**
+     * Calcula as tarifas para uma requisição
+     * @param request Dados da requisição de tarifa
+     * @return Resposta com cálculo detalhado das tarifas
+     */
+    public TariffCalculationResponse calculateTariff(TariffRequestDto request) {
+        return tariffCalculator.calculate(request);
+    }
 
 }
