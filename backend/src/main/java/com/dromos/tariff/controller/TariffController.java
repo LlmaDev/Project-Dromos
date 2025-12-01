@@ -1,8 +1,10 @@
 package com.dromos.tariff.controller;
 
-import com.dromos.tariff.model.Tariff;
+import com.dromos.tariff.model.*;
 import com.dromos.tariff.service.TariffService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tariffs")
@@ -13,11 +15,11 @@ public class TariffController {
         this.service = service;
     }
 
-    @GetMapping
-    public Tariff getTariff(
-            @RequestParam String origin,
-            @RequestParam String destination,
-            @RequestParam String hsCode) {
-        return service.getTariff(origin, destination, hsCode);
+    /**
+     * Busca lista de países da API WTO
+     */
+    @GetMapping("/countries")
+    public List<Country> getCountries() {
+        return service.getCountries();
     }
 }
