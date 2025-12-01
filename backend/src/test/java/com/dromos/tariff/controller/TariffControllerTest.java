@@ -43,7 +43,7 @@ class TariffControllerTest {
                 .andExpect(jsonPath("$[0].code").value("076"))
                 .andExpect(jsonPath("$[0].name").value("Brazil"))
                 .andExpect(jsonPath("$[1].code").value("840"))
-                .andExpect(jsonPath("$[1].name").value("United States of"));
+                .andExpect(jsonPath("$[1].name").value("United States of America"));
 
         verify(tariffService, times(1)).getCountries();
     }
