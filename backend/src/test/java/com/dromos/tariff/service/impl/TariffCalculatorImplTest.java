@@ -42,7 +42,7 @@ class TariffCalculatorImplTest {
         tariffData.setReportingEconomy("Brazil");
         tariffData.setValue(4.0);
         
-        when(wtoApiClient.fetchTariffData("97", List.of("076"))).thenReturn(Arrays.asList(tariffData));
+        when(wtoApiClient.fetchTariffData("97", List.of("076", "950"))).thenReturn(Arrays.asList(tariffData));
         when(countryService.getCountryNameByCode("950")).thenReturn("Africa");
         when(countryService.getCountryNameByCode("076")).thenReturn("Brazil");
 
@@ -75,7 +75,7 @@ class TariffCalculatorImplTest {
         tariffData.setReportingEconomyCode("840"); // Diferente do endLocationCode
         tariffData.setValue(4.0);
         
-        when(wtoApiClient.fetchTariffData("97", List.of("076"))).thenReturn(Arrays.asList(tariffData));
+        when(wtoApiClient.fetchTariffData("97", List.of("076", "950"))).thenReturn(Arrays.asList(tariffData));
         when(countryService.getCountryNameByCode("950")).thenReturn("Africa");
         when(countryService.getCountryNameByCode("076")).thenReturn("Brazil");
 
@@ -94,7 +94,7 @@ class TariffCalculatorImplTest {
         // Given
         TariffRequestDto request = new TariffRequestDto("97", "200", "950", "076");
         
-        when(wtoApiClient.fetchTariffData("97", List.of("076"))).thenThrow(new RuntimeException("API Error"));
+        when(wtoApiClient.fetchTariffData("97", List.of("076", "950"))).thenThrow(new RuntimeException("API Error"));
 
         // When
         TariffCalculationResponse result = tariffCalculator.calculate(request);
@@ -118,7 +118,7 @@ class TariffCalculatorImplTest {
         tariffData.setReportingEconomy("Brazil");
         tariffData.setValue(null); // Valor nulo
         
-        when(wtoApiClient.fetchTariffData("97", List.of("076"))).thenReturn(Arrays.asList(tariffData));
+        when(wtoApiClient.fetchTariffData("97", List.of("076", "950"))).thenReturn(Arrays.asList(tariffData));
         when(countryService.getCountryNameByCode("950")).thenReturn("Africa");
         when(countryService.getCountryNameByCode("076")).thenReturn("Brazil");
 

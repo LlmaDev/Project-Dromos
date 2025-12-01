@@ -42,6 +42,13 @@ public class TariffCalculatorImpl implements TariffCalculator {
             
         } catch (Exception e) {
             System.err.println("Erro ao calcular tarifa: " + e.getMessage());
+            // Still try to set country names even if API call fails
+            try {
+                response.setStartLocationName(countryService.getCountryNameByCode(request.getStartLocationCode()));
+                response.setEndLocationName(countryService.getCountryNameByCode(request.getEndLocationCode()));
+            } catch (Exception countryException) {
+                // Ignore country name lookup failures
+            }
             setDefaultValues(response, request.getTotalPrice());
         }
         
