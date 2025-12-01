@@ -32,5 +32,37 @@ class TariffCalculatorImplTest {
         tariffCalculator = new TariffCalculatorImpl(wtoApiClient, countryService);
     }
 
-    
+    @Test
+    void calculate_ShouldReturnCalculatedTariff() {
+        // Given
+        TariffRequestDto request = new TariffRequestDto("97", "200", "950", "076");
+        
+        TariffData tariffData = new TariffData();
+        tariffData.setReportingEconomyCode("076");
+        tariffData.setReportingEconomy("Brazil");
+        tariffData.setValue(4.0);
+        
+        when(wtoApiClient.fetchTariffData("97")).thenReturn(Arrays.asList(tariffData));
+        when(countryService.getCountryNameByCode("950")).thenReturn("Africa");
+        when(countryService.getCountryNameByCode("076")).thenReturn("Brazil");
+
+        // When
+        TariffCalculationResponse result = tariffCalculator.calculate(request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("97", result.getHsCode());
+        assertEquals("200", result.getTotalPrice());
+        assertEquals("950", result.getStartLocationCode());
+        assertEquals("076", result.getEndLocationCode());
+        assertEquals("Africa", result.getStartLocationName());
+        assertEquals("Brazil", result.getEndLocationName());
+        assertEquals(8.0, result.getTotalTariff()); // 200 * 4% = 8
+        assertEquals(208.0, result.getFinalPrice()); // 200 + 8 = 208
+        assertEquals(1, result.getTariffDetails().size());
+        assertEquals("076", result.getTariffDetails().get(0).getCountryCode());
+        assertEquals("Brazil", result.getTariffDetails().get(0).getCountryName());
+        assertEquals(4.0, result.getTariffDetails().get(0).getTariffRate());
+        assertEquals(8.0, result.getTariffDetails().get(0).getCalculatedTariff());
+    }
 }
