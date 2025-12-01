@@ -28,6 +28,26 @@ pipeline {
             }
         }
         
+        stage('Test') {
+            steps {
+                dir('backend') {
+                    script {
+                        if (isUnix()) {
+                            sh 'mvn test'
+                        } else {
+                            bat 'mvn test'
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'backend/target/surefire-reports/*.xml',
+                          allowEmptyResults: true
+                }
+            }
+        }
+        
         stage('Build') {
             steps {
                 dir('backend') {
