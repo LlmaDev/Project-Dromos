@@ -108,4 +108,29 @@ class TariffCalculatorImplTest {
         assertTrue(result.getTariffDetails().isEmpty());
     }
 
+     @Test
+    void calculate_WhenTariffValueIsNull_ShouldUseZero() {
+        // Given
+        TariffRequestDto request = new TariffRequestDto("97", "200", "950", "076");
+        
+        TariffData tariffData = new TariffData();
+        tariffData.setReportingEconomyCode("076");
+        tariffData.setReportingEconomy("Brazil");
+        tariffData.setValue(null); // Valor nulo
+        
+        when(wtoApiClient.fetchTariffData("97")).thenReturn(Arrays.asList(tariffData));
+        when(countryService.getCountryNameByCode("950")).thenReturn("Africa");
+        when(countryService.getCountryNameByCode("076")).thenReturn("Brazil");
+
+        // When
+        TariffCalculationResponse result = tariffCalculator.calculate(request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(0.0, result.getTotalTariff());
+        assertEquals(200.0, result.getFinalPrice());
+        assertEquals(1, result.getTariffDetails().size());
+        assertEquals(0.0, result.getTariffDetails().get(0).getTariffRate());
+        assertEquals(0.0, result.getTariffDetails().get(0).getCalculatedTariff());
+    }
 }
