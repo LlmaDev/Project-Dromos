@@ -67,10 +67,11 @@ public class WtoApiClientImpl implements WtoApiClient {
 
     private String buildTariffDataUrl(String hsCode, List<String> countryCodes) throws Exception {
         int currentYear = Year.now().getValue();
+        countryCodes.forEach(code -> URLEncoder.encode(code, StandardCharsets.UTF_8));
         String countryCodesParam = String.join(",", countryCodes);
         return String.format("%s/data?i=HS_A_0010&r=%s&pc=%s&ps=%d&subscription-key=%s",
                 wtoBaseUrl,
-                URLEncoder.encode(countryCodesParam, StandardCharsets.UTF_8),
+                countryCodesParam,
                 URLEncoder.encode(hsCode, StandardCharsets.UTF_8),
                 currentYear - 1,
                 URLEncoder.encode(wtoApiKey, StandardCharsets.UTF_8));
