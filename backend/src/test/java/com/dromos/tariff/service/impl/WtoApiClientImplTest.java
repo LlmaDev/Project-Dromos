@@ -38,7 +38,25 @@ class WtoApiClientImplTest {
         setField("wtoApiKey", "test-key");
         setField("wtoBaseUrl", "https://test-api.wto.org/timeseries/v1");
     }
+    
+    @Test
+    void fetchCountries_ShouldReturnCountriesList() throws Exception {
+        // Given
+        String jsonResponse = "[{\"code\":\"076\",\"name\":\"Brazil\"}]";
+        List<Country> expectedCountries = Arrays.asList(new Country("076", "Brazil"));
+        
+        when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(jsonResponse);
+        when(objectMapper.readValue(eq(jsonResponse), any(TypeReference.class))).thenReturn(expectedCountries);
 
+        // When
+        List<Country> result = wtoApiClient.fetchCountries();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("076", result.get(0).getCode());
+        assertEquals("Brazil", result.get(0).getName());
+    }
 
     private void setField(String fieldName, String value) {
         try {
