@@ -1,17 +1,18 @@
 pipeline {
     agent any
-    
+
+    environment {
+        WTO_API_KEY = credentials('3940be3728fa44bbaeb5f519ec3050bc')
+    }
+
     stages {
-        
         stage('Check Environment') {
             steps {
                 script {
                     if (isUnix()) {
                         sh 'java -version'
-                        sh 'mvn -version'
                     } else {
                         bat 'java -version'
-                        bat 'mvn -version'
                     }
                 }
             }
@@ -19,40 +20,45 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Pega o código do repositório
                 checkout scm
             }
         }
-        
-        stage('Build') {
+
+        stage('Unit Tests') {
             steps {
                 dir('backend') {
                     script {
                         if (isUnix()) {
-                            // Linux/Unix/Mac
-                            sh 'mvn clean package'
+                            sh 'chmod +x mvnw'
+                            sh './mvnw clean test -B'
                         } else {
-                            // Windows
-                            bat 'mvn clean package'
+                            bat 'mvnw.cmd clean test -B'
                         }
                     }
                 }
             }
             post {
                 always {
-                    // Arquiva os artifacts da build
-                    archiveArtifacts artifacts: 'backend/target/*.jar', 
-                                   fingerprint: true,
-                                   allowEmptyArchive: true
-                    
-                    // Arquiva relatórios de teste
-                    publishTestResults testResultsPattern: 'backend/target/surefire-reports/*.xml',
-                                     allowEmptyResults: true
-                    
-                    // Arquiva logs da build
-                    archiveArtifacts artifacts: 'backend/target/maven-status/**/*', 
-                                   fingerprint: false,
-                                   allowEmptyArchive: true
+                    junit testResults: 'backend/target/surefire-reports/*.xml', allowEmptyResults: true
+                }
+            }
+        }
+
+        stage('Build JAR') {
+            steps {
+                dir('backend') {
+                    script {
+                        if (isUnix()) {
+                            sh './mvnw package -DskipTests -B'
+                        } else {
+                            bat 'mvnw.cmd package -DskipTests -B'
+                        }
+                    }
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'backend/target/*.jar', fingerprint: true
                 }
             }
         }
@@ -60,14 +66,13 @@ pipeline {
 
     post {
         always {
-            // Limpa o workspace (mantém artifacts arquivados)
             cleanWs()
         }
         success {
-            echo 'Build completed successfully!'
+            echo '✅ Pipeline finalizado com sucesso!'
         }
         failure {
-            echo 'Build failed!'
+            echo '❌ Falha no Pipeline.'
         }
     }
 }
