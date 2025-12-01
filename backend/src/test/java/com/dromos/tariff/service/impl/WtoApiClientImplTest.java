@@ -71,6 +71,30 @@ class WtoApiClientImplTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void fetchTariffData_ShouldReturnTariffDataList() throws Exception {
+        // Given
+        String jsonResponse = "{\"Dataset\":[{\"ReportingEconomyCode\":\"076\",\"Value\":5.0}]}";
+        TariffData tariffData = new TariffData();
+        tariffData.setReportingEconomyCode("076");
+        tariffData.setValue(5.0);
+        
+        TariffDataResponse tariffResponse = new TariffDataResponse();
+        tariffResponse.setDataset(Arrays.asList(tariffData));
+
+        when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(jsonResponse);
+        when(objectMapper.readValue(eq(jsonResponse), eq(TariffDataResponse.class))).thenReturn(tariffResponse);
+
+        // When
+        List<TariffData> result = wtoApiClient.fetchTariffData("97");
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("076", result.get(0).getReportingEconomyCode());
+        assertEquals(5.0, result.get(0).getValue());
+    }
+
     private void setField(String fieldName, String value) {
         try {
             var field = WtoApiClientImpl.class.getDeclaredField(fieldName);
