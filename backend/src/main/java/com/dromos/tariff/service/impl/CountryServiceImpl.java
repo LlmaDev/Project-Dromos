@@ -22,8 +22,15 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public List<Country> getAllCountries() {
-        // todo
-        return null;
+        List<Country> countries = wtoApiClient.fetchCountries();
+        
+        // Atualiza o cache
+        updateCache(countries);
+        
+        // Retorna apenas code e name conforme solicitado
+        return countries.stream()
+                .map(country -> new Country(country.getCode(), country.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -32,4 +39,13 @@ public class CountryServiceImpl implements CountryService {
         return null;
     }
 
+    private void updateCache(List<Country> countries) {
+        countryCache = countries.stream()
+                .collect(Collectors.toMap(
+                    Country::getCode, 
+                    Country::getName,
+                    (existing, replacement) -> existing, // Em caso de duplicata, manter existente
+                    HashMap::new
+                ));
+    }
 }
