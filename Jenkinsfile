@@ -38,12 +38,29 @@ pipeline {
                     }
                 }
             }
+            post {
+                always {
+                    // Arquiva os artifacts da build
+                    archiveArtifacts artifacts: 'backend/target/*.jar', 
+                                   fingerprint: true,
+                                   allowEmptyArchive: true
+                    
+                    // Arquiva relatórios de teste
+                    publishTestResults testResultsPattern: 'backend/target/surefire-reports/*.xml',
+                                     allowEmptyResults: true
+                    
+                    // Arquiva logs da build
+                    archiveArtifacts artifacts: 'backend/target/maven-status/**/*', 
+                                   fingerprint: false,
+                                   allowEmptyArchive: true
+                }
+            }
         }
     }
 
     post {
         always {
-            // Limpa o workspace
+            // Limpa o workspace (mantém artifacts arquivados)
             cleanWs()
         }
         success {
