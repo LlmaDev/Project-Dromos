@@ -28,4 +28,25 @@ class CountryServiceImplTest {
         countryService = new CountryServiceImpl(wtoApiClient);
     }
 
+    @Test
+    void getAllCountries_ShouldReturnFilteredCountriesList() {
+        // Given
+        List<Country> mockCountries = Arrays.asList(
+            new Country("076", "Brazil", "BRA", 1),
+            new Country("840", "United States", "USA", 2)
+        );
+        when(wtoApiClient.fetchCountries()).thenReturn(mockCountries);
+
+        // When
+        List<Country> result = countryService.getAllCountries();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("076", result.get(0).getCode());
+        assertEquals("Brazil", result.get(0).getName());
+        assertNull(result.get(0).getIso3A()); // Deve ser null pois só retorna code e name
+        assertNull(result.get(0).getDisplayOrder()); // Deve ser null pois só retorna code e name
+    }
+
 }
