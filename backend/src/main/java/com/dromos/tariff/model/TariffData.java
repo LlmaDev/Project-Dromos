@@ -1,5 +1,8 @@
 package com.dromos.tariff.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TariffData {
     private String ReportingEconomyCode;
     private String ReportingEconomy;
