@@ -86,7 +86,7 @@ class WtoApiClientImplTest {
         when(objectMapper.readValue(eq(jsonResponse), eq(TariffDataResponse.class))).thenReturn(tariffResponse);
 
         // When
-        List<TariffData> result = wtoApiClient.fetchTariffData("97");
+        List<TariffData> result = wtoApiClient.fetchTariffData("97", Arrays.asList("076"));
 
         // Then
         assertNotNull(result);
@@ -101,7 +101,7 @@ class WtoApiClientImplTest {
         when(restTemplate.getForObject(anyString(), eq(String.class))).thenThrow(new RuntimeException("API Error"));
 
         // When
-        List<TariffData> result = wtoApiClient.fetchTariffData("97");
+        List<TariffData> result = wtoApiClient.fetchTariffData("97", Arrays.asList("076"));
 
         // Then
         assertNotNull(result);

@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface WtoApiClient {
     List<Country> fetchCountries();
-    List<TariffData> fetchTariffData(String hsCode);
+    List<TariffData> fetchTariffData(String hsCode, List<String> countryCodes);
 }

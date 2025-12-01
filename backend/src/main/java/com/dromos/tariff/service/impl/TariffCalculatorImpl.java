@@ -25,7 +25,13 @@ public class TariffCalculatorImpl implements TariffCalculator {
         TariffCalculationResponse response = buildInitialResponse(request);
         
         try {
-            List<TariffData> tariffData = wtoApiClient.fetchTariffData(request.getHsCode());
+            List<TariffData> tariffData = wtoApiClient.fetchTariffData(
+                request.getHsCode(), 
+                List.of(
+                    request.getEndLocationCode(), 
+                    request.getStartLocationCode()
+                )
+            );
             
             // Define nomes dos países
             response.setStartLocationName(countryService.getCountryNameByCode(request.getStartLocationCode()));

@@ -46,9 +46,9 @@ public class WtoApiClientImpl implements WtoApiClient {
     }
 
     @Override
-    public List<TariffData> fetchTariffData(String hsCode) {
+    public List<TariffData> fetchTariffData(String hsCode, List<String> countryCodes) {
         try {
-            String url = buildTariffDataUrl(hsCode);
+            String url = buildTariffDataUrl(hsCode, countryCodes);
             String response = restTemplate.getForObject(url, String.class);
             
             TariffDataResponse tariffResponse = objectMapper.readValue(response, TariffDataResponse.class);
@@ -65,10 +65,12 @@ public class WtoApiClientImpl implements WtoApiClient {
             URLEncoder.encode(wtoApiKey, StandardCharsets.UTF_8);
     }
 
-    private String buildTariffDataUrl(String hsCode) throws Exception {
+    private String buildTariffDataUrl(String hsCode, List<String> countryCodes) throws Exception {
         int currentYear = Year.now().getValue();
-        return String.format("%s/data?i=HS_A_0010&pc=%s&ps=%d&subscription-key=%s",
+        String countryCodesParam = String.join(",", countryCodes);
+        return String.format("%s/data?i=HS_A_0010&r=%s&pc=%s&ps=%d&subscription-key=%s",
                 wtoBaseUrl,
+                URLEncoder.encode(countryCodesParam, StandardCharsets.UTF_8),
                 URLEncoder.encode(hsCode, StandardCharsets.UTF_8),
                 currentYear - 1,
                 URLEncoder.encode(wtoApiKey, StandardCharsets.UTF_8));
