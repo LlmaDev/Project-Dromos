@@ -28,4 +28,22 @@ class TariffServiceTest {
     void setUp() {
         tariffService = new TariffService(countryService, tariffCalculator);
     }
+
+    @Test
+    void getCountries_ShouldDelegateToCountryService() {
+        // Given
+        List<Country> expectedCountries = Arrays.asList(
+            new Country("076", "Brazil"),
+            new Country("840", "United States")
+        );
+        when(countryService.getAllCountries()).thenReturn(expectedCountries);
+
+        // When
+        List<Country> result = tariffService.getCountries();
+
+        // Then
+        assertEquals(expectedCountries, result);
+        verify(countryService, times(1)).getAllCountries();
+    }
+
 }
