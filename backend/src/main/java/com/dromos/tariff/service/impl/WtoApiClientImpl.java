@@ -34,8 +34,18 @@ public class WtoApiClientImpl implements WtoApiClient {
     @Override
     public List<Country> fetchCountries() {
         try {
+            if (wtoApiKey == null || wtoApiKey.trim().isEmpty()) {
+                System.err.println("WTO API key não configurada. Configure a variável de ambiente WTO_API_KEY.");
+                return new ArrayList<>();
+            }
+            
             String url = buildCountriesUrl();
             String response = restTemplate.getForObject(url, String.class);
+            
+            if (response == null || response.trim().isEmpty()) {
+                System.err.println("Resposta vazia da API WTO.");
+                return new ArrayList<>();
+            }
             
             return objectMapper.readValue(response, new TypeReference<List<Country>>() {});
             
