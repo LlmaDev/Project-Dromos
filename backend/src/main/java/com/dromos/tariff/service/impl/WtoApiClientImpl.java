@@ -44,9 +44,33 @@ public class WtoApiClientImpl implements WtoApiClient {
             return new ArrayList<>();
         }
     }
-    
+
+    @Override
+    public List<TariffData> fetchTariffData(String hsCode) {
+        try {
+            String url = buildTariffDataUrl(hsCode);
+            String response = restTemplate.getForObject(url, String.class);
+            
+            TariffDataResponse tariffResponse = objectMapper.readValue(response, TariffDataResponse.class);
+            return tariffResponse.getDataset() != null ? tariffResponse.getDataset() : new ArrayList<>();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar dados de tarifa da API WTO: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
     private String buildCountriesUrl() throws Exception {
         return wtoBaseUrl + "/reporters?subscription-key=" + 
             URLEncoder.encode(wtoApiKey, StandardCharsets.UTF_8);
+    }
+
+    private String buildTariffDataUrl(String hsCode) throws Exception {
+        int currentYear = Year.now().getValue();
+        return String.format("%s/data?i=HS_A_0010&pc=%s&ps=%d&subscription-key=%s",
+                wtoBaseUrl,
+                URLEncoder.encode(hsCode, StandardCharsets.UTF_8),
+                currentYear - 1,
+                URLEncoder.encode(wtoApiKey, StandardCharsets.UTF_8));
     }
 }
