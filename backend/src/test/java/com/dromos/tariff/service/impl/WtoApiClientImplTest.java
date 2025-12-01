@@ -95,6 +95,19 @@ class WtoApiClientImplTest {
         assertEquals(5.0, result.get(0).getValue());
     }
 
+    @Test
+    void fetchTariffData_WhenApiThrowsException_ShouldReturnEmptyList() throws Exception {
+        // Given
+        when(restTemplate.getForObject(anyString(), eq(String.class))).thenThrow(new RuntimeException("API Error"));
+
+        // When
+        List<TariffData> result = wtoApiClient.fetchTariffData("97");
+
+        // Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
     private void setField(String fieldName, String value) {
         try {
             var field = WtoApiClientImpl.class.getDeclaredField(fieldName);
