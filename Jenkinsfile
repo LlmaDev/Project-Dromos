@@ -38,6 +38,19 @@ pipeline {
                     }
                 }
             }
-        }  
+        }
+    }
+
+    post {
+        always {
+            // Limpa o workspace
+            cleanWs()
+        }
+        success {
+            echo 'Build completed successfully!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
     }
 }
