@@ -27,5 +27,24 @@ class TariffControllerTest {
 
     @MockitoBean
     private TariffService tariffService;
+     @Test
+    void getCountries_ShouldReturnCountriesList() throws Exception {
+        // Given
+        List<Country> countries = Arrays.asList(
+            new Country("076", "Brazil"),
+            new Country("840", "United States of America")
+        );
+        when(tariffService.getCountries()).thenReturn(countries);
 
+        // When & Then
+        mockMvc.perform(get("/api/tariffs/countries"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].code").value("076"))
+                .andExpect(jsonPath("$[0].name").value("Brazil"))
+                .andExpect(jsonPath("$[1].code").value("840"))
+                .andExpect(jsonPath("$[1].name").value("United States of"));
+
+        verify(tariffService, times(1)).getCountries();
+    }
 }
