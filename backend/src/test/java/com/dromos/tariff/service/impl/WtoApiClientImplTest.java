@@ -58,6 +58,19 @@ class WtoApiClientImplTest {
         assertEquals("Brazil", result.get(0).getName());
     }
 
+    @Test
+    void fetchCountries_WhenApiThrowsException_ShouldReturnEmptyList() throws Exception {
+        // Given
+        when(restTemplate.getForObject(anyString(), eq(String.class))).thenThrow(new RuntimeException("API Error"));
+
+        // When
+        List<Country> result = wtoApiClient.fetchCountries();
+
+        // Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
     private void setField(String fieldName, String value) {
         try {
             var field = WtoApiClientImpl.class.getDeclaredField(fieldName);
