@@ -46,4 +46,22 @@ class TariffServiceTest {
         verify(countryService, times(1)).getAllCountries();
     }
 
+    @Test
+    void calculateTariff_ShouldDelegateToTariffCalculator() {
+        // Given
+        TariffRequestDto request = new TariffRequestDto("97", "200", "950", "076");
+        TariffCalculationResponse expectedResponse = new TariffCalculationResponse();
+        expectedResponse.setHsCode("97");
+        expectedResponse.setTotalTariff(8.0);
+        
+        when(tariffCalculator.calculate(request)).thenReturn(expectedResponse);
+
+        // When
+        TariffCalculationResponse result = tariffService.calculateTariff(request);
+
+        // Then
+        assertEquals(expectedResponse, result);
+        verify(tariffCalculator, times(1)).calculate(request);
+    }
+
 }
