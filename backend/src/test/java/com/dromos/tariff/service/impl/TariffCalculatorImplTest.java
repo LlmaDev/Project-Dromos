@@ -88,4 +88,24 @@ class TariffCalculatorImplTest {
         assertEquals(200.0, result.getFinalPrice());
         assertTrue(result.getTariffDetails().isEmpty());
     }
+
+    @Test
+    void calculate_WhenApiThrowsException_ShouldReturnDefaultValues() {
+        // Given
+        TariffRequestDto request = new TariffRequestDto("97", "200", "950", "076");
+        
+        when(wtoApiClient.fetchTariffData("97")).thenThrow(new RuntimeException("API Error"));
+
+        // When
+        TariffCalculationResponse result = tariffCalculator.calculate(request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("97", result.getHsCode());
+        assertEquals("200", result.getTotalPrice());
+        assertEquals(0.0, result.getTotalTariff());
+        assertEquals(200.0, result.getFinalPrice());
+        assertTrue(result.getTariffDetails().isEmpty());
+    }
+
 }
