@@ -16,6 +16,14 @@ public class TariffController {
     }
 
     /**
+     * Calcula tarifas baseado em códigos HS e países
+     */
+    @PostMapping("/calculate")
+    public TariffCalculationResponse calculateTariff(@RequestBody TariffRequestDto request) {
+        return service.calculateTariff(request);
+    }
+
+    /**
      * Busca lista de países da API WTO
      */
     @GetMapping("/countries")
