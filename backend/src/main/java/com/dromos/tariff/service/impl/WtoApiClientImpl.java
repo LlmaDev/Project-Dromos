@@ -47,6 +47,11 @@ public class WtoApiClientImpl implements WtoApiClient {
 
     @Override
     public List<TariffData> fetchTariffData(String hsCode, List<String> countryCodes) {
+        if (!validateInput(hsCode, countryCodes)) {
+            System.err.println("Input inválido para busca de dados de tarifa.");
+            return new ArrayList<>();
+        }
+        
         try {
             String url = buildTariffDataUrl(hsCode, countryCodes);
             String response = restTemplate.getForObject(url, String.class);
@@ -58,6 +63,23 @@ public class WtoApiClientImpl implements WtoApiClient {
             System.err.println("Erro ao buscar dados de tarifa da API WTO: " + e.getMessage());
             return new ArrayList<>();
         }
+    }
+
+    boolean validateInput(String hsCode, List<String> countryCodes) {
+        if (hsCode == null || hsCode.isEmpty()) {
+            return false;
+        }
+        if (countryCodes == null || countryCodes.isEmpty()) {
+            return false;
+        }
+
+        return hasUniqueCountryCodes(countryCodes);
+    }
+
+    private boolean hasUniqueCountryCodes(List<String> countryCodes) {
+        //do not allow duplicate country codes
+        long distinctCount = countryCodes.stream().distinct().count();
+        return distinctCount == countryCodes.size();
     }
 
     private String buildCountriesUrl() throws Exception {
