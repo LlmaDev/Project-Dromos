@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        WTO_API_KEY = credentials('3940be3728fa44bbaeb5f519ec3050bc')
+        WTO_API_KEY = credentials('wto-api-key-secret')
     }
 
     stages {
@@ -59,6 +59,7 @@ pipeline {
             post {
                 success {
                     archiveArtifacts artifacts: 'backend/target/*.jar', fingerprint: true
+                    archiveArtifacts artifacts: 'backend/target/maven-status/**/*', allowEmptyArchive: true
                 }
             }
         }
