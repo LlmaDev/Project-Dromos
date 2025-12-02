@@ -42,35 +42,8 @@ pipeline {
             }
             post {
                 always {
-                    // Publica resultados dos testes
                     junit testResults: 'backend/target/surefire-reports/*.xml',
-                          allowEmptyResults: true,
-                          skipPublishingChecks: false,
-                          testDataPublishers: [[$class: 'StabilityTestDataPublisher']]
-                    
-                    // Arquiva relatórios de teste como artifacts
-                    archiveArtifacts artifacts: 'backend/target/surefire-reports/**/*', 
-                                   fingerprint: true,
-                                   allowEmptyArchive: true,
-                                   onlyIfSuccessful: false
-                    
-                    // Publica relatório de cobertura de testes (se disponível)
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'backend/target/site/jacoco',
-                        reportFiles: 'index.html',
-                        reportName: 'Coverage Report'
-                    ])
-                    
-                    echo "=== RELATÓRIO DE TESTES ENTREGUE ==="
-                    echo "Resultados dos testes disponíveis em:"
-                    echo "- JUnit: ${env.BUILD_URL}testReport/"
-                    echo "- Artifacts: ${env.BUILD_URL}artifact/backend/target/surefire-reports/"
-                    if (fileExists('backend/target/site/jacoco/index.html')) {
-                        echo "- Cobertura: ${env.BUILD_URL}Coverage_Report/"
-                    }
+                          allowEmptyResults: true
                 }
             }
         }
@@ -95,6 +68,10 @@ pipeline {
                     archiveArtifacts artifacts: 'backend/target/*.jar', 
                                    fingerprint: true,
                                    allowEmptyArchive: true
+                    
+                    // Publica resultados dos testes
+                    junit testResults: 'backend/target/surefire-reports/*.xml',
+                          allowEmptyResults: true
                     
                     // Arquiva logs da build
                     archiveArtifacts artifacts: 'backend/target/maven-status/**/*', 
