@@ -37,7 +37,6 @@ wto.api.base-url=https://api.wto.org/timeseries/v1
 
 ### Variáveis de Ambiente
 ```bash
-``` .env
 WTO_API_KEY=sua_chave_da_api_wto
 ```
 
