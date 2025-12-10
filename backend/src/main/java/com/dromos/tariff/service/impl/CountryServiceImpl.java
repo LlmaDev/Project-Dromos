@@ -35,9 +35,20 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public String getCountryNameByCode(String code) {
-       // todo
-        return null;
+        // Verifica se o código é nulo ou vazio
+        if (code == null || code.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Verifica se o cache foi inicializado
+        if (countryCache == null) {
+            return null;
+        }
+        
+        // Retorna o nome do país do cache (ou null se não encontrado)
+        return countryCache.get(code);
     }
+
 
     private void updateCache(List<Country> countries) {
         countryCache = countries.stream()
